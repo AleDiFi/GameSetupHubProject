@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  users-service:
+    build: ./users-service
+    ports:
+      - "4001:4001"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/gamesetuphub
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongo
+
+  configs-service:
+    build: ./configs-service
+    ports:
+      - "4002:4002"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/gamesetuphub
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - users-service
+      - configs-service
+
+volumes:
+  mongo-data:
